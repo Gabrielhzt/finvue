@@ -17,5 +17,6 @@ export default function Logo() {
             height: "40px",
             objectFit: "cover",
         }}
+        priority
     />
 }
