@@ -8,6 +8,13 @@ export default {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+	screens: {
+		sm: '660px',
+		md: '768px',
+		lg: '1115px',
+		xl: '1300px',
+		'tablet': '640px',
+	  },
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
