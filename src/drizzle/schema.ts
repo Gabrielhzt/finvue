@@ -4,13 +4,14 @@ import {
     text,
     primaryKey,
     integer,
+    uuid,
+    decimal,
+    pgEnum,
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "next-auth/adapters"
   
 export const users = pgTable("user", {
-    id: text("id")
-        .primaryKey()
-        .$defaultFn(() => crypto.randomUUID()),
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
     name: text("name"),
     email: text("email").unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),
@@ -18,9 +19,9 @@ export const users = pgTable("user", {
 })
   
 export const accounts = pgTable("account", {
-    userId: text("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("providerAccountId").notNull(),
@@ -38,15 +39,15 @@ export const accounts = pgTable("account", {
         }),
     })
 )
-  
+
 export const sessions = pgTable("session", {
     sessionToken: text("sessionToken").primaryKey(),
-    userId: text("userId")
-        .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
     expires: timestamp("expires", { mode: "date" }).notNull(),
 })
-  
+
 export const verificationTokens = pgTable(
     "verificationToken",
     {
@@ -60,3 +61,63 @@ export const verificationTokens = pgTable(
         }),
     })
 )
+
+export const categories = pgTable("category", {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    name: text("name").notNull(),
+    color: text("color").notNull(),
+    icon: text("icon").notNull(),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" })
+    .$defaultFn(() => new Date()),
+})
+
+export const transactionTypes = pgEnum("transaction_type", ["income", "expense"])
+
+export const transactions = pgTable("transaction", {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    type: transactionTypes("type").notNull(),
+    description: text("description"),
+    date: timestamp("date", { mode: "date" })
+    .$defaultFn(() => new Date()),
+    categoryId: uuid("categoryId")
+    .references(() => categories.id, { onDelete: "set null" }),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+})
+
+export const budgets = pgTable("budget", {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    spent: decimal("spent", { precision: 10, scale: 2 }).$default(() => "0"),
+    month: integer("month").notNull(),
+    year: integer("year").notNull(),
+    categoryId: uuid("categoryId")
+    .notNull()
+    .references(() => categories.id, { onDelete: "cascade" }),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+})
+
+export const recurringTransactionTypes = pgEnum("recurring_transaction_type", ["daily", "weekly", "monthly", "yearly"])
+
+export const recurringTransactions = pgTable("recurring_transaction", {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    type: transactionTypes("type").notNull(),
+    description: text("description"),
+    frequency: recurringTransactionTypes("frequency").notNull(),
+    startDate: timestamp("start_date", { mode: "date" }).notNull(),
+    endDate: timestamp("end_date", { mode: "date" }),
+    categoryId: uuid("categoryId")
+    .references(() => categories.id, { onDelete: "set null" }),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+    lastProcessed: timestamp("last_processed", { mode: "date" }),
+})

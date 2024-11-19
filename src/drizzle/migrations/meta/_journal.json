@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731845563999,
-      "tag": "0000_light_goblin_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731855742161,
-      "tag": "0001_heavy_outlaw_kid",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1731856121635,
-      "tag": "0002_chilly_cable",
+      "when": 1732026105080,
+      "tag": "0000_shiny_polaris",
       "breakpoints": true
     }
   ]
