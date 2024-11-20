@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp } from "lucide-react"
+import { TrendingDown, TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 
 import {
@@ -18,21 +18,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const chartData = [
-    { month: "January", income: 4560, expenses: 3200 },
-    { month: "February", income: 5285, expenses: 4100 },
-    { month: "March", income: 4977, expenses: 3820 },
-    { month: "April", income: 5153, expenses: 4290 },
-    { month: "May", income: 5489, expenses: 4130 },
-    { month: "June", income: 5194, expenses: 4340 },
-    { month: "July", income: 5394, expenses: 4240 },
-    { month: "August", income: 5594, expenses: 4440 },
-    { month: "September", income: 5294, expenses: 4140 },
-    { month: "October", income: 5494, expenses: 4540 },
-    { month: "November", income: 5694, expenses: 4640 },
-    { month: "December", income: 5894, expenses: 4740 },
-]
-
 const chartConfig = {
     income: {
         label: "Income",
@@ -44,7 +29,15 @@ const chartConfig = {
     },
 } satisfies ChartConfig
 
-export function BarChartComponent() {
+export function BarChartComponent({ lastTwelveMonths, monthlyTransactions }: { 
+    lastTwelveMonths: Date[], 
+    monthlyTransactions: Array<{
+        month: string;
+        income: number | string;
+        expenses: number | string;
+        trend: string;
+    }> 
+}) {
 
     return (
         <Card>
@@ -55,7 +48,7 @@ export function BarChartComponent() {
             <CardContent className="flex-1 min-h-0">
                 <div className="xl:h-[calc(100vh-415px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[calc(100vh-400px)]">
                     <ChartContainer config={chartConfig} className="w-full xl:h-[calc(100vh-415px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[calc(100vh-400px)]">
-                        <BarChart accessibilityLayer data={chartData}>
+                        <BarChart accessibilityLayer data={monthlyTransactions}>
                             <CartesianGrid vertical={false} />
                             <XAxis
                             dataKey="month"
@@ -76,7 +69,11 @@ export function BarChartComponent() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm mt-auto">
                 <div className="flex gap-2 font-medium leading-none">
-                Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+                    {monthlyTransactions[monthlyTransactions.length - 1].trend} {
+                        monthlyTransactions[monthlyTransactions.length - 1].trend.includes('up') 
+                        ? <TrendingUp className="h-4 w-4" />
+                        : <TrendingDown className="h-4 w-4" />
+                    }
                 </div>
                 <div className="leading-none text-muted-foreground">
                 Showing income and expenses for the last 12 months

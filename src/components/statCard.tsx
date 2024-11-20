@@ -13,7 +13,7 @@ export default function StatCard({ title, icon, value, percentage }: { title: st
                 {icon}
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
+                <div className="text-2xl font-bold">{Number(value) < 0 ? `-$${Math.abs(Number(value))}` : `$${value}`}</div>
                 <p className="text-xs text-muted-foreground">{percentage} from last month</p>
             </CardContent>
         </Card>
