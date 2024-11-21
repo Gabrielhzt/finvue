@@ -14,18 +14,19 @@ import {
 import { NavUser } from "./nav-user"
 import { SidebarSubCard } from "./sidebar-sub-card"
 import { SidebarHeaderC } from "./sidebar-header"
+import Link from "next/link"
   
 export function AppSidebar() {
 
     const items = [
         {
           title: "Overview",
-          url: "#",
+          url: "/dashboard",
           icon: Home,
         },
         {
           title: "Transactions",
-          url: "#",
+          url: "/transactions",
           icon: ArrowUpDown,
         },
         {
@@ -56,10 +57,10 @@ export function AppSidebar() {
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild tooltip={item.title}>
-                                        <a href={item.url}>
+                                        <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
-                                        </a>
+                                        </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

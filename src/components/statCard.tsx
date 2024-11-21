@@ -7,7 +7,7 @@ import {
 
 export default function StatCard({ title, icon, value, percentage }: { title: string, icon: React.ReactNode, value: string, percentage: string }) {
     return (
-        <Card className="w-full">
+        <Card className="w-full h-fit">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 {icon}
