@@ -7,28 +7,24 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { deleteTransaction } from "@/lib/actions"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+    id: string
+    amount: number
+    type: string
+    description: string | null
+    date: Date
 }
 
 export const columns: ColumnDef<Payment>[] = [
   {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "description",
+    header: "Description",
   },
   {
     accessorKey: "amount",
@@ -44,6 +40,19 @@ export const columns: ColumnDef<Payment>[] = [
     },
   },
   {
+    accessorKey: "type",
+    header: "Type",
+  },
+  {
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => {
+      const date = row.getValue("date") as Date
+      const formatted = date.toDateString()
+      return <div>{formatted}</div>
+    }
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const payment = row.original
@@ -57,7 +66,7 @@ export const columns: ColumnDef<Payment>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => deleteTransaction(payment.id)}>
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

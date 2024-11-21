@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/drizzle/db"
-import { recurringTransactions, transactions } from "@/drizzle/schema"
-import { and, desc, eq, sql } from "drizzle-orm"
+import { categories, recurringTransactions, transactions } from "@/drizzle/schema"
+import { and, asc, desc, eq, sql } from "drizzle-orm"
 
 export const getTotalIncome = async () => {
     const session = await auth()
@@ -381,4 +381,206 @@ export const getRecentTransactions = async () => {
         .limit(6)
 
     return transactionsResult
+}
+
+export const getAllTransactions = async () => {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return []
+
+    const transactionsResult = await db.select({
+            id: transactions.id,
+            amount: transactions.amount,
+            type: transactions.type,
+            description: transactions.description,
+            date: transactions.date
+        })
+        .from(transactions)
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.date))
+    ;
+
+    return transactionsResult
+}
+
+export const getIncomeBreakdown = async () => {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return []
+
+    const currentDate = new Date()
+    const currentMonth = currentDate.getMonth()
+    const currentYear = currentDate.getFullYear()
+    
+    const transactionsResult = await db.select({
+        description: transactions.description,
+        total: sql<number>`sum(amount)`
+    })
+    .from(transactions)
+    .where(
+        and(
+            eq(transactions.type, "income"),
+            eq(transactions.userId, userId),
+            sql`EXTRACT(MONTH FROM date) = ${currentMonth + 1}`,
+            sql`EXTRACT(YEAR FROM date) = ${currentYear}`
+        )
+    )
+    .groupBy(transactions.description)
+
+    const combinedResults = new Map<string, number>()
+    transactionsResult.forEach(t => {
+        const desc = t.description || 'Other'
+        combinedResults.set(desc, (combinedResults.get(desc) || 0) + Number(t.total || 0))
+    })
+
+    const total = Array.from(combinedResults.values()).reduce((sum, val) => sum + val, 0)
+
+    return Array.from(combinedResults.entries()).map(([description, value], index) => ({
+        description,
+        value,
+        percentage: ((value / total) * 100).toFixed(1),
+        fill: `hsl(var(--chart-${(index % 12) + 1}))`
+    }))
+}
+
+export const getRecurringIncomeBreakdown = async () => {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return []
+
+    const recurringResult = await db.select({
+        description: recurringTransactions.description,
+        total: sql<number>`sum(amount)`,
+        frequency: recurringTransactions.frequency
+    })
+    .from(recurringTransactions)
+    .where(
+        and(
+            eq(recurringTransactions.type, "income"),
+            eq(recurringTransactions.userId, userId),
+            sql`start_date <= CURRENT_DATE`,
+            sql`(end_date IS NULL OR end_date >= CURRENT_DATE)`
+        )
+    )
+    .groupBy(recurringTransactions.description, recurringTransactions.frequency)
+
+    const combinedResults = new Map<string, number>()
+    recurringResult.forEach(t => {
+        const desc = t.description || 'Other'
+        let amount = Number(t.total || 0)
+        
+        switch(t.frequency) {
+            case 'weekly':
+                amount *= 4
+                break
+            case 'daily':
+                amount *= 30
+                break
+            case 'yearly':
+                amount /= 12
+                break
+        }
+        
+        combinedResults.set(desc, (combinedResults.get(desc) || 0) + amount)
+    })
+
+    const total = Array.from(combinedResults.values()).reduce((sum, val) => sum + val, 0)
+
+    return Array.from(combinedResults.entries()).map(([description, value], index) => ({
+        description,
+        value,
+        percentage: ((value / total) * 100).toFixed(1),
+        fill: `hsl(var(--chart-${(index % 12) + 1}))`
+    }))
+}
+
+export const getExpenseBreakdown = async () => {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return []
+
+    const currentDate = new Date()
+    const currentMonth = currentDate.getMonth()
+    const currentYear = currentDate.getFullYear()
+    
+    const transactionsResult = await db.select({
+        description: transactions.description,
+        total: sql<number>`sum(amount)`
+    })
+    .from(transactions)
+    .where(
+        and(
+            eq(transactions.type, "expense"),
+            eq(transactions.userId, userId),
+            sql`EXTRACT(MONTH FROM date) = ${currentMonth + 1}`,
+            sql`EXTRACT(YEAR FROM date) = ${currentYear}`
+        )
+    )
+    .groupBy(transactions.description)
+
+    const combinedResults = new Map<string, number>()
+    transactionsResult.forEach(t => {
+        const desc = t.description || 'Other'
+        combinedResults.set(desc, (combinedResults.get(desc) || 0) + Number(t.total || 0))
+    })
+
+    const total = Array.from(combinedResults.values()).reduce((sum, val) => sum + val, 0)
+
+    return Array.from(combinedResults.entries()).map(([description, value], index) => ({
+        description,
+        value,
+        percentage: ((value / total) * 100).toFixed(1),
+        fill: `hsl(var(--chart-${(index % 12) + 1}))`
+    }))
+}
+
+export const getRecurringExpenseBreakdown = async () => {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return []
+
+    const recurringResult = await db.select({
+        description: recurringTransactions.description,
+        total: sql<number>`sum(amount)`,
+        frequency: recurringTransactions.frequency
+    })
+    .from(recurringTransactions)
+    .where(
+        and(
+            eq(recurringTransactions.type, "expense"),
+            eq(recurringTransactions.userId, userId),
+            sql`start_date <= CURRENT_DATE`,
+            sql`(end_date IS NULL OR end_date >= CURRENT_DATE)`
+        )
+    )
+    .groupBy(recurringTransactions.description, recurringTransactions.frequency)
+
+    const combinedResults = new Map<string, number>()
+    recurringResult.forEach(t => {
+        const desc = t.description || 'Other'
+        let amount = Number(t.total || 0)
+        
+        switch(t.frequency) {
+            case 'weekly':
+                amount *= 4
+                break
+            case 'daily':
+                amount *= 30
+                break
+            case 'yearly':
+                amount /= 12
+                break
+        }
+        
+        combinedResults.set(desc, (combinedResults.get(desc) || 0) + amount)
+    })
+
+    const total = Array.from(combinedResults.values()).reduce((sum, val) => sum + val, 0)
+
+    return Array.from(combinedResults.entries()).map(([description, value], index) => ({
+        description,
+        value,
+        percentage: ((value / total) * 100).toFixed(1),
+        fill: `hsl(var(--chart-${(index % 12) + 1}))`
+    }))
 }

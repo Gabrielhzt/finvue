@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,25 +13,29 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { createTransaction } from "@/lib/actions"
+import { createRecurringTransaction } from "@/lib/actions"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export function TransactionsDialog() {
+export function RecurringTransactionDialog() {
     const handleSubmit = async (formData: FormData) => {
-        console.log('Submitting normal transaction:', Object.fromEntries(formData));
-        await createTransaction(formData);
+        const endDate = formData.get('endDate') as string;
+        if (!endDate) {
+            formData.set('endDate', '');
+        }
+        console.log('Submitting recurring transaction:', Object.fromEntries(formData));
+        await createRecurringTransaction(formData);
     }
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline">Add Transaction</Button>
+                <Button variant="outline">Add Recurring Transaction</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Add Transaction</DialogTitle>
+                    <DialogTitle>Add Recurring Transaction</DialogTitle>
                     <DialogDescription>
-                        Add a new transaction to the list.
+                        Add a new recurring transaction to the list.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit}>
@@ -66,13 +72,35 @@ export function TransactionsDialog() {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="date">Date</Label>
+                            <Label htmlFor="startDate">Start Date</Label>
                             <Input
-                                id="date"
-                                name="date"
+                                id="startDate"
+                                name="startDate"
                                 type="date"
                                 required
                             />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="endDate">End Date (Optional)</Label>
+                            <Input
+                                id="endDate"
+                                name="endDate"
+                                type="date"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="frequency">Frequency</Label>
+                            <Select name="frequency" required>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="daily">Daily</SelectItem>
+                                    <SelectItem value="weekly">Weekly</SelectItem>
+                                    <SelectItem value="monthly">Monthly</SelectItem>
+                                    <SelectItem value="yearly">Yearly</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <DialogFooter className="sm:justify-start">
@@ -89,4 +117,4 @@ export function TransactionsDialog() {
             </DialogContent>
         </Dialog>
     )
-}
+} 

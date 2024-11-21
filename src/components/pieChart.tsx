@@ -7,7 +7,6 @@ import { Label, Pie, PieChart } from "recharts"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,13 +17,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-]
+
+
 
 const chartConfig = {
   visitors: {
@@ -52,15 +46,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function PieChartComponent() {
+export function PieChartComponent({ data, title }: { data: { description: string, value: number, percentage: string, fill: string }[], title: string }) {
   const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
+    return data.reduce((acc, curr) => acc + curr.value, 0)
   }, [])
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
+        <CardTitle>Pie Chart - {title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -73,9 +67,9 @@ export function PieChartComponent() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              data={data}
+              dataKey="value"
+              nameKey="description"
               innerRadius={60}
               strokeWidth={5}
             >
@@ -92,16 +86,16 @@ export function PieChartComponent() {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
+                          className="fill-foreground text-2xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          ${Math.round(totalVisitors)}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          {title}
                         </tspan>
                       </text>
                     )
@@ -113,11 +107,15 @@ export function PieChartComponent() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+        <div className="leading-none text-muted-foreground">
+          {title === "Incomes" 
+            ? "Breakdown of your income sources for this month"
+            : "Breakdown of your expenses for this month"}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          {title === "Incomes"
+            ? "Track and analyze your revenue streams"
+            : "Monitor and optimize your spending habits"}
         </div>
       </CardFooter>
     </Card>

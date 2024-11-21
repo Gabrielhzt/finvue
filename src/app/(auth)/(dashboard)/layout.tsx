@@ -39,7 +39,7 @@ export default async function DashboardLayout({
                         <ModeToggle />
                     </div>
                 </header>
-                <main className="p-4">
+                <main className={`p-4 w-full h-[calc(100vh-64px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[calc(100vh-48px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:max-lg:h-auto max-xl:h-auto`}>
                     {children}
                 </main>
             </SidebarInset>

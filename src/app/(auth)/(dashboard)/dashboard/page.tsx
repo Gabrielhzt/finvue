@@ -14,7 +14,7 @@ export default async function Dashboard() {
     const recentTransactions = await getRecentTransactions();
 
     return (
-        <div className={`flex flex-col gap-4 w-full h-[calc(100vh-100px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[calc(100vh-80px)] group-has-[[data-collapsible=icon]]/sidebar-wrapper:max-lg:h-auto max-xl:h-auto`}>
+        <div className={`flex flex-col gap-4 w-full h-full`}>
             <div className="grid grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 w-full">
                 <StatCard title="Total Balance" icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} value={totalBalance.value} percentage={totalBalance.percentage} />
                 <StatCard title="Monthly Income" icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} value={totalIncome.value} percentage={totalIncome.percentage} />
